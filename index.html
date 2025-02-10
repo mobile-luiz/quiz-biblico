@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta de Perguntas Bíblicas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1e1e1e;
+            color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 600px;
+            width: 100%;
+            flex: 1;
+        }
+
+        .roleta-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .roleta {
+            width: 250px;
+            height: 250px;
+            border: 10px solid #333;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 2s ease-out;
+            background: conic-gradient(
+                #ff6384 0 25%,
+                #36a2eb 25% 50%,
+                #cc65fe 50% 75%,
+                #ffce56 75% 100%
+            );
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            transform-origin: bottom right;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .segment:nth-child(1) {
+            transform: rotate(45deg);
+            background: #ff6384;
+        }
+
+        .segment:nth-child(2) {
+            transform: rotate(135deg);
+            background: #36a2eb;
+        }
+
+        .segment:nth-child(3) {
+            transform: rotate(225deg);
+            background: #cc65fe;
+        }
+
+        .segment:nth-child(4) {
+            transform: rotate(315deg);
+            background: #ffce56;
+        }
+
+        .segment span {
+            transform: rotate(-45deg);
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .seta {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 15px solid #ff6384;
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.2);
+            }
+        }
+
+        .pergunta-container {
+            text-align: center;
+            display: block;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #444;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .pergunta-container p {
+            font-size: 20px;
+            margin: 0 0 20px 0;
+        }
+
+        .alternativas {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .alternativa {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #555;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 16px;
+        }
+
+        .alternativa:hover {
+            background-color: #666;
+            transform: translateY(-3px);
+        }
+
+        #spinButton, #finalizarButton {
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #ff6384;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 99, 132, 0.4);
+            margin-top: 10px;
+        }
+
+        #spinButton:hover, #finalizarButton:hover {
+            background-color: #e55971;
+            transform: translateY(-3px);
+        }
+
+        .resultado {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .pontos-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pontos {
+            font-size: 22px;
+            margin: 0;
+            color: #ffd700;
+        }
+
+        .pontos span {
+            font-weight: 700;
+        }
+
+        .footer {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .footer-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .footer-logo img {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .footer p {
+            margin: 2px 0;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #444;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .modal-content button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #ff6384;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .modal-content button:hover {
+            background-color: #e55971;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 600px) {
+            .roleta {
+                width: 200px;
+                height: 200px;
+            }
+
+            #spinButton, #finalizarButton {
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+
+            .pergunta-container p {
+                font-size: 18px;
+            }
+
+            .alternativa {
+                font-size: 14px;
+            }
+
+            .pontos {
+                font-size: 18px;
+            }
+
+            .footer-logo img {
+                width: 40px;
+            }
+
+            .footer p {
+                font-size: 12px;
+            }
+
+            .modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="roleta-container">
+            <div class="seta"></div>
+            <div class="roleta" id="roleta">
+                <div class="segment">
+                    <span>Fácil</span>
+                </div>
+                <div class="segment">
+                    <span>Difícil</span>
+                </div>
+                <div class="segment">
+                    <span>Fácil</span>
+                </div>
+                <div class="segment">
+                    <span>Difícil</span>
+                </div>
+            </div>
+        </div>
+        <button id="spinButton">Girar a Roleta</button>
+        <button id="finalizarButton">Finalizar</button>
+        <div class="pergunta-container" id="perguntaContainer">
+            <p id="pergunta"></p>
+            <div class="alternativas" id="alternativas"></div>
+            <p id="feedback" class="resultado"></p>
+        </div>
+        <div class="pontos-container">
+            <p class="pontos">Pontos: <span id="pontos">0</span></p>
+            <p class="pontos">Perguntas feitas: <span id="perguntasFeitas">0</span></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-logo">
+            <img src="ipad.jpeg" alt="Logo da Igreja">
+            <p>Igreja Pentecostal Assembleia de Deus</p>
+        
+        </div>
+        <p>Setor Agrestina - PE</p>
+        <p>Pastor Local: João da Silva</p>
+        <p>Pastor Presidente: Carlos de Souza</p>
+    </div>
+
+    <div id="finalizarModal" class="modal">
+        <div class="modal-content">
+            <p>Tem certeza de que deseja finalizar o jogo?</p>
+            <button id="simButton">Sim</button>
+            <button id="naoButton">Não</button>
+        </div>
+    </div>
+
+    <script>
+        const perguntasFaceis = [
+            {
+                pergunta: "Qual foi o primeiro milagre de Jesus?",
+                alternativas: ["Transformar água em vinho", "Curar um cego", "Andar sobre as águas", "Multiplicar pães e peixes"],
+                resposta: 0
+            },
+            {
+                pergunta: "Quantos discípulos Jesus tinha?",
+                alternativas: ["10", "11", "12", "13"],
+                resposta: 2
+            },
+            {
+                pergunta: "Quem foi lançado na cova dos leões?",
+                alternativas: ["José", "Moisés", "Daniel", "Jonas"],
+                resposta: 2
+            },
+            {
+                pergunta: "Qual o nome da mãe de Jesus?",
+                alternativas: ["Ana", "Marta", "Maria", "Isabel"],
+                resposta: 2
+            },
+            {
+                pergunta: "Quem construiu a arca?",
+                alternativas: ["Moisés", "Abraão", "Noé", "Davi"],
+                resposta: 2
+            },
+            {
+                pergunta: "Quantos livros há na Bíblia?",
+                alternativas: ["66", "72", "73", "81"],
+                resposta: 0
+            },
+            {
+                pergunta: "Quem foi jogado na fornalha ardente?",
+                alternativas: ["Daniel", "Sadraque, Mesaque e Abede-Nego", "José", "Elias"],
+                resposta: 1
+            },
+            {
+                pergunta: "Quem conduziu o povo de Israel à terra prometida?",
+                alternativas: ["Moisés", "Josué", "Abraão", "Davi"],
+                resposta: 1
+            },
+            {
+                pergunta: "Quem escreveu os Salmos?",
+                alternativas: ["Davi", "Salomão", "Moisés", "Paulo"],
+                resposta: 0
+            },
+            {
+                pergunta: "Quantos dias e noites choveu durante o dilúvio?",
+                alternativas: ["30", "40", "50", "60"],
+                resposta: 1
+            },
+            {
+                pergunta: "Quem negou Jesus três vezes?",
+                alternativas: ["Pedro", "Judas", "Paulo", "João"],
+                resposta: 0
+            },
+            {
+                pergunta: "Qual era o nome da esposa de Adão?",
+                alternativas: ["Sara", "Eva", "Rebeca", "Raquel"],
+                resposta: 1
+            },
+            {
+                pergunta: "Quem foi vendido como escravo pelos seus irmãos?",
+                alternativas: ["José", "Moisés", "Abraão", "Isaque"],
+                resposta: 0
+            },
+            {
+                pergunta: "Qual o nome do jardim onde Adão e Eva viveram?",
+                alternativas: ["Jardim do Éden", "Jardim das Oliveiras", "Jardim de Gólgota", "Jardim de Betânia"],
+                resposta: 0
+            },
+            {
+                pergunta: "Quem foi engolido por um grande peixe?",
+                alternativas: ["Elias", "Eliseu", "Jonas", "Davi"],
+                resposta: 2
+            },
+            {
+                pergunta: "Qual era a profissão de Pedro antes de seguir Jesus?",
+                alternativas: ["Pescador", "Carpinteiro", "Pastor", "Sacerdote"],
+                resposta: 0
+            }
+        ];
+
+        const perguntasDificeis = [
+            {
+                pergunta: "Qual é o menor versículo da Bíblia?",
+                alternativas: ["Jesus chorou", "Amarás o teu próximo", "Deus é amor", "A fé move montanhas"],
+                resposta: 0
+            },
+            {
+                pergunta: "Quantos anos Matusalém viveu?",
+                alternativas: ["920", "930", "940", "969"],
+                resposta: 3
+            },
+            {
+                pergunta: "Quem foi o autor do livro de Apocalipse?",
+                alternativas: ["Paulo", "Pedro", "João", "Tiago"],
+                resposta: 2
+            },
+            {
+                pergunta: "Quem foi o primeiro rei de Israel?",
+                alternativas: ["Saul", "Davi", "Salomão", "Josias"],
+                resposta: 0
+            },
+            {
+                pergunta: "Qual foi a duração do jejum de Jesus no deserto?",
+                alternativas: ["30 dias", "40 dias", "50 dias", "60 dias"],
+                resposta: 1
+            },
+            {
+                pergunta: "Quantos capítulos há no livro de Salmos?",
+                alternativas: ["120", "130", "140", "150"],
+                resposta: 3
+            },
+            {
+                pergunta: "Quem cortou o cabelo de Sansão?",
+                alternativas: ["Dalila", "Lívia", "Sara", "Mara"],
+                resposta: 0
+            },
+            {
+                pergunta: "Qual discípulo duvidou da ressurreição de Jesus?",
+                alternativas: ["Pedro", "Tiago", "João", "Tomé"],
+                resposta: 3
+            },
+            {
+                pergunta: "Qual o nome do rio onde Jesus foi batizado?",
+                alternativas: ["Tigre", "Eufrates", "Jordão", "Nilo"],
+                resposta: 2
+            },
+            {
+                pergunta: "Quantos pães e peixes Jesus usou para alimentar 5000 pessoas?",
+                alternativas: ["5 pães e 2 peixes", "7 pães e 3 peixes", "4 pães e 1 peixe", "6 pães e 2 peixes"],
+                resposta: 0
+            },
+            {
+                pergunta: "Quem foi a rainha que visitou Salomão?",
+                alternativas: ["Rainha Ester", "Rainha de Sabá", "Rainha Jezabel", "Rainha Atalia"],
+                resposta: 1
+            },
+            {
+                pergunta: "Qual era o nome do gigante que Davi derrotou?",
+                alternativas: ["Golias", "Sansão", "Abimeleque", "Nabucodonosor"],
+                resposta: 0
+            },
+            {
+                pergunta: "Quem foi o rei que teve um sonho interpretado por Daniel?",
+                alternativas: ["Faraó", "Saul", "Nabucodonosor", "Davi"],
+                resposta: 2
+            },
+            {
+                pergunta: "Quem subiu numa árvore para ver Jesus passar?",
+                alternativas: ["Pedro", "Zaqueu", "Bartimeu", "Nicodemos"],
+                resposta: 1
+            },
+            {
+                pergunta: "Qual foi a última praga que Deus enviou ao Egito?",
+                alternativas: ["Gafanhotos", "Morte dos primogênitos", "Rãs", "Água em sangue"],
+                resposta: 1
+            },
+            {
+                pergunta: "Quem escreveu a maioria das cartas no Novo Testamento?",
+                alternativas: ["Pedro", "Paulo", "João", "Tiago"],
+                resposta: 1
+            }
+        ];
+
+        const roleta = document.getElementById('roleta');
+        const perguntaContainer = document.getElementById('perguntaContainer');
+        const perguntaElem = document.getElementById('pergunta');
+        const alternativasElem = document.getElementById('alternativas');
+        const feedbackElem = document.getElementById('feedback');
+        const pontosElem = document.getElementById('pontos');
+        const perguntasFeitasElem = document.getElementById('perguntasFeitas');
+        const spinButton = document.getElementById('spinButton');
+        const finalizarButton = document.getElementById('finalizarButton');
+        const finalizarModal = document.getElementById('finalizarModal');
+        const simButton = document.getElementById('simButton');
+        const naoButton = document.getElementById('naoButton');
+
+        let pontos = 0;
+        let perguntasFeitas = 0;
+
+        function gerarPergunta(dificil) {
+            const perguntas = dificil ? perguntasDificeis : perguntasFaceis;
+            const pergunta = perguntas[Math.floor(Math.random() * perguntas.length)];
+            return pergunta;
+        }
+
+        function exibirPergunta(pergunta) {
+            perguntasFeitas++;
+            perguntasFeitasElem.textContent = perguntasFeitas;
+            perguntaElem.textContent = pergunta.pergunta;
+            alternativasElem.innerHTML = '';
+            pergunta.alternativas.forEach((alternativa, index) => {
+                const button = document.createElement('button');
+                button.textContent = alternativa;
+                button.className = 'alternativa';
+                button.onclick = () => {
+                    if (index === pergunta.resposta) {
+                        feedbackElem.textContent = 'Correto!';
+                        feedbackElem.style.color = 'green';
+                        pontos += 10; // Adiciona 10 pontos para cada resposta correta
+                    } else {
+                        feedbackElem.textContent = 'Errado!';
+                        feedbackElem.style.color = 'red';
+                    }
+                    pontosElem.textContent = pontos;
+                };
+                alternativasElem.appendChild(button);
+            });
+            falarPergunta(pergunta.pergunta);
+        }
+
+        function falarPergunta(texto) {
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'pt-BR';
+            speechSynthesis.speak(utterance);
+        }
+
+        function girarRoleta() {
+            const angle = Math.floor(Math.random() * 360) + 720; // 720 ensures at least 2 full spins
+            roleta.style.transform = `rotate(${angle}deg)`;
+            setTimeout(() => {
+                const selectedSegment = Math.floor(((angle % 360) / 90)) % 4;
+                const dificil = selectedSegment % 2 === 1; // "Difícil" em posições ímpares
+                const pergunta = gerarPergunta(dificil);
+                exibirPergunta(pergunta);
+                perguntaContainer.style.display = 'block';
+                feedbackElem.textContent = '';
+            }, 2000); // Match this timeout with the CSS transition duration
+        }
+
+        function finalizarJogo() {
+            spinButton.style.display = 'none';
+            finalizarButton.style.display = 'none';
+            perguntaContainer.style.display = 'none';
+            const resultadoFinal = document.createElement('p');
+            resultadoFinal.className = 'resultado';
+            resultadoFinal.textContent = `Jogo finalizado! Sua pontuação final é: ${pontos} pontos.`;
+            document.querySelector('.container').appendChild(resultadoFinal);
+        }
+
+        function mostrarModalFinalizar() {
+            finalizarModal.style.display = 'flex';
+        }
+
+        function esconderModalFinalizar() {
+            finalizarModal.style.display = 'none';
+        }
+
+        spinButton.addEventListener('click', () => {
+            perguntaContainer.style.display = 'none';
+            girarRoleta();
+        });
+
+        finalizarButton.addEventListener('click', () => {
+            mostrarModalFinalizar();
+        });
+
+        simButton.addEventListener('click', () => {
+            esconderModalFinalizar();
+            finalizarJogo();
+        });
+
+        naoButton.addEventListener('click', () => {
+            esconderModalFinalizar();
+        });
+    </script>
+</body>
+</html>
